@@ -26,7 +26,7 @@ app.use(bodyParser.urlencoded({
 
 
 // 延迟函数
-const delay = function(interval) {
+const delay = function (interval) {
     typeof interval !== 'number' ? interval === 1000 : interval;
     return new Promise((resolve) => {
         setTimeout(() => {
@@ -37,7 +37,7 @@ const delay = function(interval) {
 
 // 基于multiparty插件实现文件上传处理 & form-data解析
 const uploadDir = `${__dirname}/upload`
-const multipartry_load = function(req, auto) {
+const multipartry_load = function (req, auto) {
     typeof auto !== 'boolean' ? auto = false : null
     let config = {
         maxFieldsSize: 200 * 1024 * 1024
@@ -47,7 +47,7 @@ const multipartry_load = function(req, auto) {
         await delay() //
         // 用来将客户端formData 结果解析
         new multipartry.Form(config).parse(req, (err, fields, files) => {
-            if(err) {
+            if (err) {
                 reject(err)
                 return
             }
@@ -59,9 +59,43 @@ const multipartry_load = function(req, auto) {
     })
 }
 
-app.post('/upload_single', async(req, res) => {
+// 检测文件是否已经存在
+const exists = function (path) {
+    return new Promise(resolve => {
+        fs.access(path, fs.constants.F_OK, err => {
+            if (err) resolve(false)
+            return resolve(true)
+        })
+    })
+}
+
+// 创建文件并写入到指定的目录 & 返回客户端结果
+const writeFile = function (res, path, file, filename, stream) {
+    return new Promise((resolve, reject) => {
+        if (stream) { }
+        fs.writeFile(path, file, err => {
+            if (err) {
+                reject(err)
+                res.send({
+                    code: 1,
+                    codeText: err,
+                })
+                return
+            }
+            resolve()
+            res.send({
+                code: 0,
+                codeText: '上传成功',
+                filename: filename,
+                url: path.replace(__dirname, HOSTNAME)
+            })
+        })
+    })
+}
+
+app.post('/upload_single', async (req, res) => {
     try {
-        let { files, fields} = await multipartry_load(req, true)
+        let { files, fields } = await multipartry_load(req, true)
         let file = (files.file && files.file[0]) || {}
         res.send({
             code: 0,
@@ -69,10 +103,39 @@ app.post('/upload_single', async(req, res) => {
             originFilename: file.originFilename,
             url: file.path.replace(__dirname, HOSTNAME)
         })
-    } catch(err) {
+    } catch (err) {
         res.send({
             code: 1,
             codeText: err
         })
     }
+})
+
+app.post('/upload_single_base64', async (req, res) => {
+    let file = req.body.file;
+    let filename = req.body.filename;
+    let spark = new SparkMD5.ArrayBuffer(); // 根据文件内容,生成一个hash名字
+    console.log(filename)
+    let suffix = /\.([0-9a-zA-Z]+)$/.exec(filename)[1]
+    let isExists = false
+    let path
+    file = decodeURIComponent(file);
+    file = file.replace(/^data:image\/\w+;base64,/, '')
+    file = Buffer.from(file, 'base64') // 将base64转成正常的文件格式
+    spark.append(file)
+    path = `${uploadDir}/${spark.end()}.${suffix}`
+    await delay();
+    // 检测是否存在
+    isExists = await exists(path);
+    if (isExists) {
+        res.send({
+            code: 0,
+            codeText: 'file is exists',
+            urlname: filename,
+            url: path.replace(__dirname, HOSTNAME)
+        })
+        return
+    }
+    // fs.writeFile(res)
+    writeFile(res, path, file, filename, false);
 })

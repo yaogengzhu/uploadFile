@@ -24,11 +24,26 @@
                 </ul>
             </section>
         </div>
+
+        <div class="item">
+            <h3>单一文件上传 [BASE64]</h3>
+            <section id="upload2">
+                <input type="file" accept=".png,.jpg" class="upload_ipt" style="display: none;">
+                <!-- 自己文件的按钮,来触发选择图片 -->
+                <div>
+                    <button class="upload_button select">选择文件</button>
+                    <button class="upload_button upload">上传到服务器</button>
+                </div>
+                <div class="upload_tip">只能上传 PNG/JPE/JPEG 格式图片 且大小不能超过2ＭＢ </div>
+                <ul class="upload_list">
+                </ul>
+            </section>
+        </div>
     </div>
     <script src="node_modules/axios/dist/axios.min.js"></script>
     <script src="node_modules/qs/dist/qs.js"></script>
     <script src="node_modules/spark-md5/spark-md5.min.js"></script>
-    <script src="./src/js/tuils.js"></script>
+    <script src="./src/js/utils.js"></script>
     <script src="./src/js/instance.js"></script>
     <script src="./src/js/upload.js"></script>
 </body>
