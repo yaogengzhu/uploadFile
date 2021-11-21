@@ -8,6 +8,28 @@
     <title>Document</title>
 </head>
 
+<style>
+
+    .upload_progress {
+        display: none;
+        position: relative;
+        margin-top: 10px;
+        width: 200px;
+        height: 3px;
+        border-radius: 3px;
+        background: rgb(206, 195, 195);
+        overflow: hidden;
+    }
+
+    .progress {
+        position: absolute;
+        /* width: 30%; */
+        height: 3px;
+        border-radius: 3px;
+        background-color: green;
+    }
+</style>
+
 <body>
 
     <div class="container">
@@ -38,7 +60,7 @@
             </section>
         </div>
 
-        <div class="item">
+                <div class="item">
             <h3>单一文件上传 [缩略图]</h3>
             <section id="upload3">
                 <input type="file" accept=".png,.jpg" class="upload_ipt" style="display: none;">
@@ -49,6 +71,22 @@
                 </div>
                 <div class="upload_abber">
                     <img src="" alt="" style="width: 100px; height: 100px; display: none;">
+                </div>
+            </section>
+        </div>
+
+
+        
+        <div class="item">
+            <h3>单一文件上传 [进度条管控]</h3>
+            <section id="upload4">
+                <input type="file" accept=".png,.jpg" class="upload_ipt" style="display: none;">
+                <!-- 自己文件的按钮,来触发选择图片 -->
+                <div>
+                    <button class="upload_button select">选择文件</button>
+                </div>
+                <div class="upload_progress">
+                    <div class="progress"></div>
                 </div>
             </section>
         </div>

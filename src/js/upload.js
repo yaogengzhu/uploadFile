@@ -290,3 +290,75 @@
         })
     })
 })()
+
+
+/**
+ * 缩略图方式
+ */
+
+ ; (function () {
+    let upload = document.querySelector('#upload4')
+    let upload_input = upload.querySelector('.upload_ipt')
+    let upload_button_select = upload.querySelector('.upload_button.select')
+    let upload_progress = upload.querySelector('.upload_progress')
+    let upload_progrees_value = upload.querySelector('.progress')
+
+
+    // 监听用户选择文件的操作
+    upload_input.addEventListener('change', async function () {
+        // 获取用户选择的文件
+        console.log(upload_input.files, '???')
+      
+        let file = upload_input.files[0]
+        /**
+         * + name 文件名
+         * + size 文件大小 B字节
+         * + type 文件类型
+         */
+        if (!file) return
+        // 方案1: 限制文件上传的格式
+        if (!/(png|jpg|jpeg)/i.test(file.type)) {
+            alert('上传文件格式不正确')
+        }
+        // 限制文件上传的大小
+        if (file.size > 10 * 1024 * 1024) {
+            alert('上传文件不能超过2MB')
+            return
+        }
+
+        try {
+            let formData = new FormData()
+            formData.append('file', file)
+            formData.append('filename', file.filename)
+            const data = await instance.post('/upload_single', formData, {
+                onUploadProgress: (e) => {
+                    console.log(e)
+                    const { loaded, total } = e
+                    console.log( `${loaded/total*100}%`, ' `${loaded/total*100}%`')
+                    upload_progress.style.display = 'block'
+                    upload_progrees_value.style.width = `${loaded/total*100}%`
+                }
+            })
+            const { code } = data
+            if (code === 0) {
+                upload_progrees_value.style.width = `100%`
+                alert('文件上传成功!')
+                return
+            }
+            throw data.codeText
+        } catch(e) {
+            //
+            console.log(e);
+            alert('文件上传失败')
+        } finally {
+            this.value = ''
+        }
+    })
+
+    // 点击文件选择按钮,触发上传文件的行为
+    upload_button_select.addEventListener('click', function () {
+        upload_input.click();
+    })
+
+
+})()
