@@ -1,10 +1,9 @@
 /**
  * axios 请求的公共信息进行提取
  */
-
 let instance = axios.create();
-instance.defaults.baseURL = 'https://127.0.0.1:8888'
-instance.defaults.headers['Conten-Type'] = 'multipart/form-data'
+instance.defaults.baseURL = 'http://127.0.0.1:8888'
+instance.defaults.headers['Content-Type'] = 'multipart/form-data'
 instance.defaults.transformRequest = (data, headers) => {
     const contentType = headers['contentType']
     if (contentType === 'application/x-www-form-urlencoded') {
