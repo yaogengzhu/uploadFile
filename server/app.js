@@ -139,3 +139,32 @@ app.post('/upload_single_base64', async (req, res) => {
     // fs.writeFile(res)
     writeFile(res, path, file, filename, false);
 })
+
+app.post('/upload_single_name', async (req, res) => {
+    try {
+        const { fields, files} = await multipartry_load(req)
+
+        const file = (files.file && files.file[0]) || {}
+        
+        const filename = (fields.filename && fields.filename[0]) || ''
+        console.log(fields, '???/')
+        const path = `${uploadDir}/${filename}`
+        let isExists = false
+        isExists = await exists(path)
+        console.log(path, '???')
+        if(isExists) {
+            res.send({
+                code: 0,
+                codeText: 'file is exists',
+                url: path.replace(__dirname, HOSTNAME)
+            })
+            return
+        }
+        writeFile(res, path, file, filename, true)
+    } catch(e) {
+        res.send({
+            code: 1,
+            codeText: e,            
+        })
+    }
+})
