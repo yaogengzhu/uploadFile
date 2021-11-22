@@ -10,6 +10,22 @@
 
 <style>
 
+    .container {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-right: 20px;
+        margin-bottom: 20px;
+        width: 300px;
+        height: 200px;
+        border: 1px dashed #ccc;
+    }
+
     .upload_progress {
         display: none;
         position: relative;
@@ -21,12 +37,21 @@
         overflow: hidden;
     }
 
+    .upload_tip {
+        font-size: 12px;
+    }
+
     .progress {
         position: absolute;
         /* width: 30%; */
         height: 3px;
         border-radius: 3px;
         background-color: green;
+    }
+
+    button {
+        width: 100px;
+        height: 40px;
     }
 </style>
 
@@ -42,7 +67,7 @@
                     <button class="upload_button select">选择文件</button>
                     <button class="upload_button upload">上传到服务器</button>
                 </div>
-                <div class="upload_tip">只能上传 PNG/JPE/JPEG 格式图片 且大小不能超过2ＭＢ </div>
+                <div class="upload_tip">大小不能超过2ＭＢ </div>
                 <ul class="upload_list">
 
                 </ul>
@@ -55,7 +80,7 @@
                 <input type="file" accept=".png,.jpg" class="upload_ipt" style="display: none;">
                 <!-- 自己文件的按钮,来触发选择图片 -->
                 <div>
-                    <button class="upload_button select">选择图片上产到服务器</button>
+                    <button class="upload_button select">选择图片上传</button>
                 </div>
             </section>
         </div>
@@ -93,7 +118,7 @@
 
 
         <div class="item">
-            <h3>多文件上传 []</h3>
+            <h3>多文件上传 [FORM-DATA]</h3>
             <section id="upload5">
                 <input type="file" accept=".png,.jpg" multiple class="upload_ipt" style="display: none;">
                 <!-- 自己文件的按钮,来触发选择图片 -->
@@ -104,6 +129,17 @@
                 <ul class='upload_list'>
 
                 </ul>
+            </section>
+        </div>
+
+        <div class="item">
+            <h3>拖拽上传 [FORM-DATA]</h3>
+            <section id="upload6">
+                <input type="file" accept=".png,.jpg" multiple class="upload_ipt" style="display: none;">
+                <div class="upload-box">
+                    <span>将文件拖到此处,或</span>
+                    <span  id="upload-button" style="color: rgb(58, 58, 193); cursor: pointer;">点击上传</span>
+                </div>
             </section>
         </div>
 
