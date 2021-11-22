@@ -2,7 +2,7 @@
  * axios 请求的公共信息进行提取
  */
 let instance = axios.create();
-instance.defaults.baseURL = 'http://127.0.0.1:8888'
+instance.defaults.baseURL = 'http://192.168.111.130:8888'
 instance.defaults.headers['Content-Type'] = 'multipart/form-data'
 instance.defaults.transformRequest = (data, headers) => {
     const contentType = headers['Content-Type']
