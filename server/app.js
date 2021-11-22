@@ -6,7 +6,6 @@ const SparkMD5 = require('spark-md5')
 const path = require('path')
 const app = express()
 const PORT = 8888;
-console.log(process.env)
 const HOST = 'http://127.0.0.1'
 const HOSTNAME = `${HOST}:${PORT}`
 const FONTHOSTNAME = `${HOST}:${8000}` // 前端起的服务
@@ -118,7 +117,6 @@ app.post('/upload_single_base64', async (req, res) => {
     let file = req.body.file;
     let filename = req.body.filename;
     let spark = new SparkMD5.ArrayBuffer(); // 根据文件内容,生成一个hash名字
-    console.log(filename)
     let suffix = /\.([0-9a-zA-Z]+)$/.exec(filename)[1]
     let isExists = false
     let path
@@ -150,11 +148,9 @@ app.post('/upload_single_name', async (req, res) => {
         const file = (files.file && files.file[0]) || {}
         
         const filename = (fields.filename && fields.filename[0]) || ''
-        console.log(fields, '???/')
         const path = `${uploadDir}/${filename}`
         let isExists = false
         isExists = await exists(path)
-        console.log(path, '???')
         if(isExists) {
             res.send({
                 code: 0,
