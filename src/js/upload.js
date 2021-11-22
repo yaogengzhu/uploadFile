@@ -293,9 +293,8 @@
 
 
 /**
- * 缩略图方式
+ * 进度条管控方式
  */
-
  ; (function () {
     let upload = document.querySelector('#upload4')
     let upload_input = upload.querySelector('.upload_ipt')
@@ -358,6 +357,106 @@
     // 点击文件选择按钮,触发上传文件的行为
     upload_button_select.addEventListener('click', function () {
         upload_input.click();
+    })
+
+
+})()
+
+/**
+ * 多文件上传
+ */
+ ; (function () {
+    let upload = document.querySelector('#upload5')
+    let upload_input = upload.querySelector('.upload_ipt')
+    let upload_button_select = upload.querySelector('.upload_button.select')
+    let upload_list = upload.querySelector('.upload_list')
+    const upload_button_upload = upload.querySelector('.upload_button.upload')
+    let files = []
+
+    upload_list.addEventListener('click', function (e) {
+        const target = e.target;
+        if (target.tagName === 'EM') {
+            console.log('okxxx')
+            const curli = target.parentNode.parentNode
+            if (!curli) {
+                return
+            }
+            const key = curli.getAttribute('key')
+            upload_list.removeChild(curli) // 移除元素
+            files = files.filter(item => item.key !== key)
+            console.log(files)
+        }   
+    })
+    // 监听用户选择文件的操作
+    upload_input.addEventListener('change', async function () {
+        // 获取用户选择的文件
+        files = Array.from(upload_input.files)
+        let str = ''
+        files = files.map(file => {
+            return {
+                file,
+                filename: file.name,
+                key: createRandom()
+            }
+        })
+        files.forEach((item, index) => {
+            str += `
+                <li key=${item.key}>
+                    <span>${index + 1} : ${item.filename}</span>
+                    <span>
+                        <em>删除</em>
+                    </span>
+                </li>
+            `
+        })
+        upload_list.innerHTML = str
+    })
+
+    // 点击文件选择按钮,触发上传文件的行为
+    upload_button_select.addEventListener('click', function () {
+        upload_input.click();
+    })
+
+    upload_button_upload.addEventListener('click', function () {
+        if (files.length === 0) {
+            return alert('请选择文件')
+        }
+        /**
+         * 
+         * 循环发送请求
+         */
+        const upload_list_arr = Array.from(upload_list.querySelectorAll('li'))
+
+        const _files = files.map( item => {
+            const fm = new FormData()
+            const curLi = upload_list_arr.find( liBox => liBox.getAttribute('key') === item.key);
+            const curSpan = curLi ? curLi.querySelector('span:nth-last-child(1)') : null
+            fm.append('file', item.file)
+            fm.append('filename', item.filename)
+            return instance.post('/upload_single', fm, {
+                onUploadProgress(e) {
+                    // 监听每一个上传进度
+                    const { loaded, total } = e
+                    const progress = `${(loaded/total*100).toFixed(2)}%`
+                    if (curSpan) {
+                        curSpan.innerText = progress
+                    }
+                }
+            }).then((data) => {
+                const { code } = data;
+                if(code === 0) {
+                    if (curSpan) {
+                        curSpan.innerText = '100%'
+                    }
+                    return Promise.resolve(data)
+                }
+                return Promise.reject(data.codeText)
+            })
+        })
+        Promise.all(_files).then(res => {
+            console.log(res)
+            alert('上传成功')
+        })
     })
 
 
