@@ -1,4 +1,10 @@
 # 文件上传
+
+```bash
+npm run start   # 启动前端
+npm run server  # 启动后端
+```
+
 ## 单个文件上传 form-data
 
 ## 单个文件上传 base64

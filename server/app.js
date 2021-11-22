@@ -3,11 +3,13 @@ const fs = require('fs')
 const bodyParser = require('body-parser')
 const multipartry = require('multiparty')
 const SparkMD5 = require('spark-md5')
-
+const path = require('path')
 const app = express()
 const PORT = 8888;
+console.log(process.env)
 const HOST = 'http://127.0.0.1'
 const HOSTNAME = `${HOST}:${PORT}`
+const FONTHOSTNAME = `${HOST}:${8000}` // 前端起的服务
 
 app.listen(PORT, () => {
     console.log(`serve is runnig at ${HOSTNAME}`)
@@ -37,6 +39,7 @@ const delay = function (interval) {
 
 // 基于multiparty插件实现文件上传处理 & form-data解析
 const uploadDir = `${__dirname}/upload`
+const baseDir = path.resolve(__dirname, '../')
 const multipartry_load = function (req, auto) {
     typeof auto !== 'boolean' ? auto = false : null
     let config = {
@@ -87,7 +90,7 @@ const writeFile = function (res, path, file, filename, stream) {
                 code: 0,
                 codeText: '上传成功',
                 filename: filename,
-                url: path.replace(__dirname, HOSTNAME)
+                url: path.replace(baseDir, FONTHOSTNAME)
             })
         })
     })
@@ -101,7 +104,7 @@ app.post('/upload_single', async (req, res) => {
             code: 0,
             codeText: '上传成功',
             originFilename: file.originFilename,
-            url: file.path.replace(__dirname, HOSTNAME)
+            url: file.path.replace(baseDir, FONTHOSTNAME)
         })
     } catch (err) {
         res.send({
@@ -132,7 +135,7 @@ app.post('/upload_single_base64', async (req, res) => {
             code: 0,
             codeText: 'file is exists',
             urlname: filename,
-            url: path.replace(__dirname, HOSTNAME)
+            url: path.replace(baseDir, FONTHOSTNAME)
         })
         return
     }
@@ -156,7 +159,7 @@ app.post('/upload_single_name', async (req, res) => {
             res.send({
                 code: 0,
                 codeText: 'file is exists',
-                url: path.replace(__dirname, HOSTNAME)
+                url: path.replace(baseDir, FONTHOSTNAME)
             })
             return
         }
