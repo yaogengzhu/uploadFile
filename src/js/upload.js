@@ -594,19 +594,21 @@
     upload_button_upload.addEventListener('click', async function () {
         // 点击开始上传
         let chunkList = [];
-        console.log(_file)
+        let alreadyChunkList = [];
+        console.log(_file);
         let maxSize = 1024 * 1024;
         let maxCount = Math.ceil(_file.size / maxSize); // 最大允许分割的切片数量为30
-        console.log(maxCount, 'maxCount');
         let index = 0;
         if (!_file) return alert('请先选择图片');
         const { HASH, suffix } = await changeBuffer(_file);
         // 判断当前文件可以切出多少切片
-        if ( maxCount > 10) {
+        if (maxCount > 10) {
             // 如果切片数量大于最大值
             maxSize = _file.size / 10; // 则改变切片大小
-            maxCount = 10
+            maxCount = 10;
         }
+        console.log(maxCount, 'maxCount');
+        console.log(maxSize, 'maxSize');
         while (index < maxCount) {
             chunkList.push({
                 file: _file.slice(index * maxSize, (index + 1) * maxSize),
@@ -615,7 +617,7 @@
             index++;
         }
 
-        // 先获取切片片段
+        // 先获取已经上传的切片
         const data = await instance.post(
             '/upload_already',
             {
@@ -627,8 +629,26 @@
                 },
             }
         );
-        console.log(chunkList, 'chunkListchunkList')
+        index = 0
+        const complate = async () => {
+            index++;
+            let progress = `(${index}/${maxCount})%` // 进度条
+            if (index >= maxCount) {
+                console.log('ok, 切片完成')
+            }
+        }
+
+        const { fileList } = data;
+        alreadyChunkList = fileList
+        console.log(chunkList, 'chunkList');
         chunkList = chunkList.map((item) => {
+            if (alreadyChunkList.length > 0 && alreadyChunkList.includes(item.filename)) {
+                debugger
+                // 表示切片已经存在
+                complate()
+                return;
+            }
+
             const fm = new FormData();
             fm.append('file', item.file);
             fm.append('filename', item.filename);
@@ -636,6 +656,7 @@
                 instance
                     .post('/upload_chunk', fm)
                     .then(() => {
+                        complate()
                         sovle();
                     })
                     .catch(() => {
@@ -644,18 +665,22 @@
             });
         });
         Promise.all(chunkList).then(() => {
-            // console.log('执行合并')
-            instance.post('/upload_merge', {
-                HASH: HASH,
-                count: maxCount
-            },
-            {
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-            }).then((res) => {
-                console.log('ok')
-            })
-        })
+            instance
+                .post(
+                    '/upload_merge',
+                    {
+                        HASH: HASH,
+                        count: maxCount,
+                    },
+                    {
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                    }
+                )
+                .then((res) => {
+                    console.log('ok');
+                });
+        });
     });
 })();
