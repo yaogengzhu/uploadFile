@@ -575,11 +575,6 @@
         });
     };
 
-    // 上传成功
-    const complate = () => {
-        //
-    }
-
     /**
      *  选取图片
      */
@@ -596,9 +591,9 @@
         _file = file;
     });
 
-    upload_button_upload.addEventListener('click', async function() {
+    upload_button_upload.addEventListener('click', async function () {
         // 点击开始上传
-        const chunkList = [];
+        let chunkList = [];
         let maxSize = 100;
         let maxCount = 30; // 最大允许分割的切片数量为30
         let index = 0;
@@ -612,20 +607,50 @@
         while (index < maxCount) {
             chunkList.push({
                 file: _file.slice(index * maxSize, (index + 1) * maxSize),
-                filename: `${HASH}.${suffix}`,
+                filename: `${HASH}_${index + 1}.${suffix}`,
             });
             index++;
         }
 
-        chunkList.forEach((item) => {
-            // 上传片段
+        // 先获取切片片段
+        const data = await instance.post(
+            '/upload_already',
+            {
+                HASH: HASH,
+            },
+            {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+            }
+        );
+        chunkList = chunkList.map((item) => {
             const fm = new FormData();
-            fm.append('file', item.file)
-            fm.append('filename', item.filename)
-            instance.post('/upload_chunk', fm).then(() => {
-                complate()
-            }).catch(() => {
-                //
+            fm.append('file', item.file);
+            fm.append('filename', item.filename);
+            return new Promise((sovle) => {
+                instance
+                    .post('/upload_chunk', fm)
+                    .then(() => {
+                        sovle();
+                    })
+                    .catch(() => {
+                        //
+                    });
+            });
+        });
+        Promise.all(chunkList).then(() => {
+            // console.log('执行合并')
+            instance.post('/upload_merge', {
+                HASH: HASH,
+                count: maxCount
+            },
+            {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+            }).then((res) => {
+                conose.log('ok')
             })
         })
     });

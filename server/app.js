@@ -101,10 +101,10 @@ const writeFile = function (res, path, file, filename, stream) {
 // 大文件上传 & 合并切片
 const merge = (HASH, count) => {
     return new Promise( async (resolve, reject) => {
-        const path = `${uploadDir}/${HASH}`
-        const fileList = []
+        let path = `${uploadDir}/${HASH}`
+        let fileList = []
         let suffix
-        const isExists = await exists(path); // 判断文件是否存在
+        let isExists = await exists(path); // 判断文件是否存在
         if(!isExists) {
             rject('HASH path  is not found!')
             return
@@ -117,10 +117,13 @@ const merge = (HASH, count) => {
         fileList.sort((a, b) => {
             let reg = /_(\d+)/;
             return reg.exec(a)[1] - reg.exec(b)[1];
-        }).forEach( item => {
+        }).forEach(item => {
             !suffix ? suffix = /\.([0-9a-zA-Z]+)$/.exec(item)[1] : null // 处理文件后缀
-            fs.appendFileSync(`${uploadDir}/${HASH}.${suffix}`, fs.readdirSync(`${path}/${item}`))
-            fs.unlinkSync(`${path}/${item}}`) // 删除临时切片
+            fs.appendFileSync(`${uploadDir}/${HASH}.${suffix}`);
+            fs.readdirSync(`${path}/${item}`, () => {
+                fs.unlinkSync(`${uploadDir}/${item}}`) // 删除临时切片
+            });
+          
         })
         fs.rmdirSync(path) // 删除临时文件夹
         resolve({
@@ -213,11 +216,9 @@ app.post('/upload_chunk', async (req, res) => {
         let isExists = false;
         // 创建存放切片的临时目录
         const [, HASH] = /^([^_]+)_(\d+)/.exec(filename);
-        const path = `${uploadDir}/${HASH}`; // 用hash生成一个临时文件夹
-        console.log(path, 'pathpathpathpathpath')
+        let path = `${uploadDir}/${HASH}`; // 用hash生成一个临时文件夹
         !fs.existsSync(path) ? fs.mkdirSync(path) : null; // 判断该文件夹是否存在，不存在的话，新建一个文件夹
         path = `${uploadDir}/${HASH}/${filename}`; // 将切片存到临时目录中
-
         isExists = await exists(path);
         if (isExists) {
             res.send({
@@ -257,10 +258,10 @@ app.post('/upload_merge', async (req, res) => {
 });
 
 
-app.get('/upload_already', async (req, res) => {
-    const { HASH } = req.body
-    const path = `${uploadDir}/${HASH}`
-    const fileList = []
+app.post('/upload_already', async (req, res) => {
+    let { HASH } = req.body
+    let path = `${uploadDir}/${HASH}`
+    let fileList = []
     try {
         fileList = fs.readdirSync(path)
         fileList = fileList.sort((a, b) => {
