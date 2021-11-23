@@ -467,6 +467,7 @@
      */
     ; (function () {
         const upload = document.querySelector('#upload6')
+        const dragBox = document.querySelector('#dragBox')
         const upload_ipt = upload.querySelector('.upload_ipt')
         const upload_upload_iptbox = upload.querySelector('.upload-box')
         const upload_button = upload.querySelector('#upload-button')
@@ -490,8 +491,24 @@
             })
         }
 
-        upload.addEventListener('drop', function() {
-            
+        // 拖拽进入
+        dragBox.addEventListener('dragenter', function(e) {
+            // console.log('拖拽进入')
+            e.preventDefault()
+            this.style.border = '1px solid red'
+        })
+
+        // 拖拽放下
+        dragBox.addEventListener('drop', function(e) {
+            e.preventDefault()
+            this.style.border = ''
+            const { dataTransfer: { files } } = e;
+            const file = files[0]
+            uploadFile(file)
+        })
+
+        dragBox.addEventListener('dragover', function(e) {
+            e.preventDefault()
         })
 
         upload_button.addEventListener('click', function () {
