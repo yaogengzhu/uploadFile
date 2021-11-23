@@ -119,11 +119,8 @@ const merge = (HASH, count) => {
             return reg.exec(a)[1] - reg.exec(b)[1];
         }).forEach(item => {
             !suffix ? suffix = /\.([0-9a-zA-Z]+)$/.exec(item)[1] : null // 处理文件后缀
-            fs.appendFileSync(`${uploadDir}/${HASH}.${suffix}`);
-            fs.readdirSync(`${path}/${item}`, () => {
-                fs.unlinkSync(`${uploadDir}/${item}}`) // 删除临时切片
-            });
-          
+            fs.appendFileSync(`${uploadDir}/${HASH}.${suffix}`, fs.readFileSync(`${path}/${item}`));
+            fs.unlinkSync(`${path}/${item}`);
         })
         fs.rmdirSync(path) // 删除临时文件夹
         resolve({
@@ -247,7 +244,7 @@ app.post('/upload_merge', async (req, res) => {
         res.send({
             code: 0,
             codeText: 'merge sucessfully',
-            url: path.replace(FONTHOSTNAME, HOSTNAME),
+            url: path.replace(baseDir, FONTHOSTNAME),
         });
     } catch (e) {
         res.send({

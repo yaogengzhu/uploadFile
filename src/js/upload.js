@@ -594,15 +594,18 @@
     upload_button_upload.addEventListener('click', async function () {
         // 点击开始上传
         let chunkList = [];
-        let maxSize = 100;
-        let maxCount = 30; // 最大允许分割的切片数量为30
+        console.log(_file)
+        let maxSize = 1024 * 1024;
+        let maxCount = Math.ceil(_file.size / maxSize); // 最大允许分割的切片数量为30
+        console.log(maxCount, 'maxCount');
         let index = 0;
         if (!_file) return alert('请先选择图片');
         const { HASH, suffix } = await changeBuffer(_file);
         // 判断当前文件可以切出多少切片
-        if (Math.floor(_file.size / maxSize) > maxCount) {
+        if ( maxCount > 10) {
             // 如果切片数量大于最大值
-            maxSize = _file.size / maxCount; // 则改变切片大小
+            maxSize = _file.size / 10; // 则改变切片大小
+            maxCount = 10
         }
         while (index < maxCount) {
             chunkList.push({
@@ -624,6 +627,7 @@
                 },
             }
         );
+        console.log(chunkList, 'chunkListchunkList')
         chunkList = chunkList.map((item) => {
             const fm = new FormData();
             fm.append('file', item.file);
@@ -650,7 +654,7 @@
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
             }).then((res) => {
-                conose.log('ok')
+                console.log('ok')
             })
         })
     });
